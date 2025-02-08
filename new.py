@@ -59,20 +59,39 @@ ax.set_title("Histogram of Signal Amplitudes")
 ax.legend()
 st.pyplot(fig)
 
-# Population vs Sample Analysis
+# Population vs Sample Analysis with Visualization
 st.subheader("Population vs Sample Analysis")
 
 def calculate_population_sample_stats(data):
     population_mean = np.mean(data)
     sample = np.random.choice(data, size=int(len(data) * 0.7), replace=False)
     sample_mean = np.mean(sample)
-    return population_mean, sample_mean
+    return population_mean, sample_mean, sample
 
-pop_mean_1, samp_mean_1 = calculate_population_sample_stats(data[0])
-pop_mean_2, samp_mean_2 = calculate_population_sample_stats(data[1])
+pop_mean_1, samp_mean_1, sample_1 = calculate_population_sample_stats(data[0])
+pop_mean_2, samp_mean_2, sample_2 = calculate_population_sample_stats(data[1])
 
 st.write(f"Signal 1 - Population Mean: {pop_mean_1}, Sample Mean: {samp_mean_1}")
 st.write(f"Signal 2 - Population Mean: {pop_mean_2}, Sample Mean: {samp_mean_2}")
+
+# Plot Population vs Sample
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(data[0], bins=50, alpha=0.5, label="Population Signal 1", density=True, color='blue')
+ax.hist(sample_1, bins=50, alpha=0.7, label="Sample Signal 1", density=True, color='red')
+ax.set_xlabel("Amplitude")
+ax.set_ylabel("Density")
+ax.set_title("Population vs Sample - Signal 1")
+ax.legend()
+st.pyplot(fig)
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(data[1], bins=50, alpha=0.5, label="Population Signal 2", density=True, color='green')
+ax.hist(sample_2, bins=50, alpha=0.7, label="Sample Signal 2", density=True, color='orange')
+ax.set_xlabel("Amplitude")
+ax.set_ylabel("Density")
+ax.set_title("Population vs Sample - Signal 2")
+ax.legend()
+st.pyplot(fig)
 
 st.write("Analysis Completed! 🚀")
 
