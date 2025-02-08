@@ -23,39 +23,42 @@ st.write(df.head())
 st.subheader("Descriptive Statistics")
 st.write(pd.DataFrame(data).describe().T)
 
+# Dropdown selection for signal visualization
+signal_options = {"Data Row 1": data[0], "Data Row 2": data[1], "Data Row 3": data[2], "Data Semua": data.flatten()}
+selected_signal = st.selectbox("Select Signal Data to Visualize:", list(signal_options.keys()))
+selected_data = signal_options[selected_signal]
+
 # Line Plot of Signal Data
-st.subheader("Line Plot of Signal Amplitudes")
+st.subheader("Line Plot of Selected Signal Amplitudes")
 fig, ax = plt.subplots(figsize=(12, 5))
-ax.plot(data[0], label="Signal 1", alpha=0.7)
-ax.plot(data[1], label="Signal 2", alpha=0.7)
+ax.plot(selected_data, label=selected_signal, alpha=0.7)
 ax.set_xlabel("Time (samples)")
 ax.set_ylabel("Amplitude")
-ax.set_title("Line Plot of Signal Amplitudes")
+ax.set_title(f"Line Plot of {selected_signal}")
 ax.legend()
 st.pyplot(fig)
 
-# Generate spectrogram for the first signal
+# Generate spectrogram for the selected signal
 fs = 1  # Assuming a sampling frequency of 1 Hz
-f, t, Sxx = spectrogram(data[0], fs)
+f, t, Sxx = spectrogram(selected_data, fs)
 
 # Spectrogram Plot
-st.subheader("Spectrogram of Signal 1")
+st.subheader(f"Spectrogram of {selected_signal}")
 fig, ax = plt.subplots(figsize=(10, 6))
 cax = ax.pcolormesh(t, f, 10 * np.log10(Sxx), shading='gouraud')
 ax.set_ylabel("Frequency (Hz)")
 ax.set_xlabel("Time (s)")
-ax.set_title("Spectrogram of Signal 1")
+ax.set_title(f"Spectrogram of {selected_signal}")
 fig.colorbar(cax, label="Power (dB)")
 st.pyplot(fig)
 
 # Histogram Plot
-st.subheader("Histogram of Signal Amplitudes")
+st.subheader(f"Histogram of {selected_signal} Amplitudes")
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.hist(data[0], bins=50, alpha=0.7, label="Signal 1", density=True)
-ax.hist(data[1], bins=50, alpha=0.7, label="Signal 2", density=True)
+ax.hist(selected_data, bins=50, alpha=0.7, label=selected_signal, density=True)
 ax.set_xlabel("Amplitude")
 ax.set_ylabel("Density")
-ax.set_title("Histogram of Signal Amplitudes")
+ax.set_title(f"Histogram of {selected_signal} Amplitudes")
 ax.legend()
 st.pyplot(fig)
 
@@ -71,30 +74,18 @@ def calculate_population_sample_stats(data):
     population_percentage = 100 - sample_percentage
     return population_mean, sample_mean, sample, population_percentage, sample_percentage
 
-pop_mean_1, samp_mean_1, sample_1, pop_perc_1, samp_perc_1 = calculate_population_sample_stats(data[0])
-pop_mean_2, samp_mean_2, sample_2, pop_perc_2, samp_perc_2 = calculate_population_sample_stats(data[1])
+pop_mean, samp_mean, sample_data, pop_perc, samp_perc = calculate_population_sample_stats(selected_data)
 
-st.write(f"Signal 1 - Population Mean: {pop_mean_1}, Sample Mean: {samp_mean_1}")
-st.write(f"Signal 1 - Population: {pop_perc_1:.2f}%, Sample: {samp_perc_1:.2f}%")
-st.write(f"Signal 2 - Population Mean: {pop_mean_2}, Sample Mean: {samp_mean_2}")
-st.write(f"Signal 2 - Population: {pop_perc_2:.2f}%, Sample: {samp_perc_2:.2f}%")
+st.write(f"{selected_signal} - Population Mean: {pop_mean}, Sample Mean: {samp_mean}")
+st.write(f"{selected_signal} - Population: {pop_perc:.2f}%, Sample: {samp_perc:.2f}%")
 
 # Plot Population vs Sample
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.hist(data[0], bins=50, alpha=0.5, label="Population Signal 1", density=True, color='blue')
-ax.hist(sample_1, bins=50, alpha=0.7, label="Sample Signal 1", density=True, color='red')
+ax.hist(selected_data, bins=50, alpha=0.5, label=f"Population {selected_signal}", density=True, color='blue')
+ax.hist(sample_data, bins=50, alpha=0.7, label=f"Sample {selected_signal}", density=True, color='red')
 ax.set_xlabel("Amplitude")
 ax.set_ylabel("Density")
-ax.set_title("Population vs Sample - Signal 1")
-ax.legend()
-st.pyplot(fig)
-
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.hist(data[1], bins=50, alpha=0.5, label="Population Signal 2", density=True, color='green')
-ax.hist(sample_2, bins=50, alpha=0.7, label="Sample Signal 2", density=True, color='orange')
-ax.set_xlabel("Amplitude")
-ax.set_ylabel("Density")
-ax.set_title("Population vs Sample - Signal 2")
+ax.set_title(f"Population vs Sample - {selected_signal}")
 ax.legend()
 st.pyplot(fig)
 
