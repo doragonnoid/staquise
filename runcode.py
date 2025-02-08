@@ -1,55 +1,48 @@
-import streamlit as st
 import pandas as pd
+
+# Load the CSV file
+file_path = "D:\codingan pyton/selamat.csv"
+df = pd.read_csv(file_path)
+
+# Display basic information about the dataset
+df.info(), df.head()
+# Compute descriptive statistics
+df.describe().T
+import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.decomposition import PCA
 
-file_path = "selamat.csv"
-df = pd.read_csv(file_path, header=None)
+# Convert dataframe to numpy array for easier manipulation
+data = df.to_numpy()
 
-df.info(), df.head(3)
-import matplotlib.pyplot as plt
-
-# Plot line chart for the two rows of data
+# Line plot of both rows (assuming they are separate signals)
 plt.figure(figsize=(12, 5))
-plt.plot(df.columns.astype(float), df.iloc[0], label="Signal 1", alpha=0.7)
-plt.plot(df.columns.astype(float), df.iloc[1], label="Signal 2", alpha=0.7)
-plt.xlabel("Time")
+plt.plot(data[0], label="Signal 1", alpha=0.7)
+plt.plot(data[1], label="Signal 2", alpha=0.7)
+plt.xlabel("Time (samples)")
 plt.ylabel("Amplitude")
-plt.title("Time Series Representation of Speech Signal")
+plt.title("Line Plot of Signal Amplitudes")
 plt.legend()
 plt.show()
-# Rename columns to ensure they are properly formatted as floats
-df.columns = pd.RangeIndex(start=0, stop=df.shape[1], step=1)
-
-# Plot line chart again after renaming columns
-plt.figure(figsize=(12, 5))
-plt.plot(df.columns, df.iloc[0], label="Signal 1", alpha=0.7)
-plt.plot(df.columns, df.iloc[1], label="Signal 2", alpha=0.7)
-plt.xlabel("Time")
-plt.ylabel("Amplitude")
-plt.title("Time Series Representation of Speech Signal")
-plt.legend()
-plt.show()
-import numpy as np
-import scipy.signal
+from scipy.signal import spectrogram
 
 # Generate spectrogram for the first signal
-fs = 1  # Assuming 1 unit per sample since no sampling rate info is given
-f, t, Sxx = scipy.signal.spectrogram(df.iloc[0].values, fs)
+fs = 1  # Assuming a sampling frequency of 1 Hz (adjust if needed)
+f, t, Sxx = spectrogram(data[0], fs)
 
 # Plot spectrogram
 plt.figure(figsize=(10, 6))
-plt.pcolormesh(t, f, Sxx, shading='gouraud')
-plt.ylabel('Frequency [Hz]')
-plt.xlabel('Time [s]')
-plt.title('Spectrogram of Speech Signal')
-plt.colorbar(label="Intensity")
+plt.pcolormesh(t, f, 10 * np.log10(Sxx), shading='gouraud')
+plt.ylabel("Frequency (Hz)")
+plt.xlabel("Time (s)")
+plt.title("Spectrogram of Signal 1")
+plt.colorbar(label="Power (dB)")
 plt.show()
-# Calculate descriptive statistics
-stats = df.describe().T  # Transpose for better readability
-
-# Select key statistics
-stats_summary = stats[['mean', 'std', 'min', '25%', '50%', '75%', 'max']]
-stats_summary.head(10)  # Show first 10 columns for reference
+# Plot histogram of amplitude values
+plt.figure(figsize=(10, 5))
+plt.hist(data[0], bins=50, alpha=0.7, label="Signal 1", density=True)
+plt.hist(data[1], bins=50, alpha=0.7, label="Signal 2", density=True)
+plt.xlabel("Amplitude")
+plt.ylabel("Density")
+plt.title("Histogram of Signal Amplitudes")
+plt.legend()
+plt.show()
