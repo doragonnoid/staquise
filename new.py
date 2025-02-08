@@ -59,6 +59,21 @@ ax.set_title("Histogram of Signal Amplitudes")
 ax.legend()
 st.pyplot(fig)
 
+# Population vs Sample Analysis
+st.subheader("Population vs Sample Analysis")
+
+def calculate_population_sample_stats(data):
+    population_mean = np.mean(data)
+    sample = np.random.choice(data, size=int(len(data) * 0.7), replace=False)
+    sample_mean = np.mean(sample)
+    return population_mean, sample_mean
+
+pop_mean_1, samp_mean_1 = calculate_population_sample_stats(data[0])
+pop_mean_2, samp_mean_2 = calculate_population_sample_stats(data[1])
+
+st.write(f"Signal 1 - Population Mean: {pop_mean_1}, Sample Mean: {samp_mean_1}")
+st.write(f"Signal 2 - Population Mean: {pop_mean_2}, Sample Mean: {samp_mean_2}")
+
 st.write("Analysis Completed! 🚀")
 
 # Create requirements.txt file
