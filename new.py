@@ -2,12 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
-from scipy.signal import spectrogram, welch
-from scipy.fftpack import fft
-from sklearn.decomposition import PCA
-import librosa
-import librosa.display
+from scipy.signal import spectrogram
 
 # Load CSV file without header
 df = pd.read_csv("selamat.csv", header=None)
@@ -28,79 +23,93 @@ st.write(df.head())
 st.subheader("Descriptive Statistics")
 st.write(pd.DataFrame(data).describe().T)
 
-# Heatmap of correlation
-st.subheader("Feature Correlation Heatmap")
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(pd.DataFrame(data).corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-st.pyplot(fig)
-
 # Line Plot of Signal Data
 st.subheader("Line Plot of Signal Amplitudes")
 fig, ax = plt.subplots(figsize=(12, 5))
-for i in range(len(data)):
-    ax.plot(data[i], label=f"Signal {i+1}", alpha=0.7)
+ax.plot(data[0], label="Signal 1", alpha=0.7)
+ax.plot(data[1], label="Signal 2", alpha=0.7)
 ax.set_xlabel("Time (samples)")
 ax.set_ylabel("Amplitude")
 ax.set_title("Line Plot of Signal Amplitudes")
 ax.legend()
 st.pyplot(fig)
 
-# Spectrogram for each signal
+# Generate spectrogram for the first signal
 fs = 1  # Assuming a sampling frequency of 1 Hz
-for i in range(len(data)):
-    f, t, Sxx = spectrogram(data[i], fs)
-    st.subheader(f"Spectrogram of Signal {i+1}")
-    fig, ax = plt.subplots(figsize=(10, 6))
-    cax = ax.pcolormesh(t, f, 10 * np.log10(Sxx), shading='gouraud')
-    ax.set_ylabel("Frequency (Hz)")
-    ax.set_xlabel("Time (s)")
-    ax.set_title(f"Spectrogram of Signal {i+1}")
-    fig.colorbar(cax, label="Power (dB)")
-    st.pyplot(fig)
+f, t, Sxx = spectrogram(data[0], fs)
 
-# FFT Analysis
-st.subheader("FFT (Fast Fourier Transform) Analysis")
-fig, ax = plt.subplots(figsize=(10, 5))
-for i in range(len(data)):
-    fft_vals = np.abs(fft(data[i]))[:len(data[i])//2]
-    fft_freqs = np.fft.fftfreq(len(data[i]), d=1/fs)[:len(data[i])//2]
-    ax.plot(fft_freqs, fft_vals, label=f"Signal {i+1}")
-ax.set_xlabel("Frequency (Hz)")
-ax.set_ylabel("Magnitude")
-ax.set_title("FFT Analysis of Signals")
-ax.legend()
+# Spectrogram Plot
+st.subheader("Spectrogram of Signal 1")
+fig, ax = plt.subplots(figsize=(10, 6))
+cax = ax.pcolormesh(t, f, 10 * np.log10(Sxx), shading='gouraud')
+ax.set_ylabel("Frequency (Hz)")
+ax.set_xlabel("Time (s)")
+ax.set_title("Spectrogram of Signal 1")
+fig.colorbar(cax, label="Power (dB)")
 st.pyplot(fig)
 
 # Histogram Plot
 st.subheader("Histogram of Signal Amplitudes")
 fig, ax = plt.subplots(figsize=(10, 5))
-for i in range(len(data)):
-    ax.hist(data[i], bins=50, alpha=0.7, label=f"Signal {i+1}", density=True)
+ax.hist(data[0], bins=50, alpha=0.7, label="Signal 1", density=True)
+ax.hist(data[1], bins=50, alpha=0.7, label="Signal 2", density=True)
 ax.set_xlabel("Amplitude")
 ax.set_ylabel("Density")
 ax.set_title("Histogram of Signal Amplitudes")
 ax.legend()
 st.pyplot(fig)
 
-# PCA for Dimensionality Reduction
-st.subheader("PCA for Dimensionality Reduction")
-pca = PCA(n_components=2)
-pca_data = pca.fit_transform(data.T)
-fig, ax = plt.subplots(figsize=(8, 6))
-ax.scatter(pca_data[:, 0], pca_data[:, 1], alpha=0.7)
-ax.set_xlabel("Principal Component 1")
-ax.set_ylabel("Principal Component 2")
-ax.set_title("PCA Projection of Signal Data")
+# Population vs Sample Analysis with Visualization
+st.subheader("Population vs Sample Analysis")
+
+def calculate_population_sample_stats(data):
+    population_mean = np.mean(data)
+    sample_size = int(len(data) * 0.7)
+    sample = np.random.choice(data, size=sample_size, replace=False)
+    sample_mean = np.mean(sample)
+    sample_percentage = (sample_size / len(data)) * 100
+    population_percentage = 100 - sample_percentage
+    return population_mean, sample_mean, sample, population_percentage, sample_percentage
+
+pop_mean_1, samp_mean_1, sample_1, pop_perc_1, samp_perc_1 = calculate_population_sample_stats(data[0])
+pop_mean_2, samp_mean_2, sample_2, pop_perc_2, samp_perc_2 = calculate_population_sample_stats(data[1])
+
+st.write(f"Signal 1 - Population Mean: {pop_mean_1}, Sample Mean: {samp_mean_1}")
+st.write(f"Signal 1 - Population: {pop_perc_1:.2f}%, Sample: {samp_perc_1:.2f}%")
+st.write(f"Signal 2 - Population Mean: {pop_mean_2}, Sample Mean: {samp_mean_2}")
+st.write(f"Signal 2 - Population: {pop_perc_2:.2f}%, Sample: {samp_perc_2:.2f}%")
+
+# Plot Population vs Sample
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(data[0], bins=50, alpha=0.5, label="Population Signal 1", density=True, color='blue')
+ax.hist(sample_1, bins=50, alpha=0.7, label="Sample Signal 1", density=True, color='red')
+ax.set_xlabel("Amplitude")
+ax.set_ylabel("Density")
+ax.set_title("Population vs Sample - Signal 1")
+ax.legend()
 st.pyplot(fig)
 
-# Mel-Frequency Cepstral Coefficients (MFCCs) for Speech Analysis
-st.subheader("MFCC Analysis for Speech Data")
-fig, ax = plt.subplots(figsize=(10, 6))
-mfccs = librosa.feature.mfcc(y=data[0], sr=fs, n_mfcc=13)
-librosa.display.specshow(mfccs, x_axis='time', cmap='coolwarm', ax=ax)
-ax.set_ylabel("MFCC Coefficients")
-ax.set_xlabel("Time (samples)")
-ax.set_title("MFCC of Signal 1")
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(data[1], bins=50, alpha=0.5, label="Population Signal 2", density=True, color='green')
+ax.hist(sample_2, bins=50, alpha=0.7, label="Sample Signal 2", density=True, color='orange')
+ax.set_xlabel("Amplitude")
+ax.set_ylabel("Density")
+ax.set_title("Population vs Sample - Signal 2")
+ax.legend()
 st.pyplot(fig)
 
 st.write("Analysis Completed! 🚀")
+
+# Create requirements.txt file
+requirements = """
+streamlit
+pandas
+matplotlib
+numpy
+scipy
+"""
+
+with open("requirements.txt", "w") as f:
+    f.write(requirements)
+
+st.write("Generated requirements.txt for deployment.")
