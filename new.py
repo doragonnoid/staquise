@@ -3,6 +3,36 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import spectrogram
+1. Loading and Displaying Data
+Loads a CSV file without a header into a Pandas DataFrame.
+Converts the DataFrame into a NumPy array for numerical processing.
+Displays:
+The shape of the dataset.
+The first few rows.
+Descriptive statistics (mean, std, min, max, etc.).
+2. Signal Data Visualization
+Line Plot of Signal Amplitudes:
+
+Plots the first two signals (rows) from the dataset.
+Shows amplitude variation over time.
+Spectrogram of Signal 1:
+
+Computes a spectrogram using scipy.signal.spectrogram().
+Uses a sampling frequency (fs) of 1 Hz.
+Displays a color-coded frequency-time representation of the first signal.
+Histogram of Signal Amplitudes:
+
+Shows amplitude distributions for the first two signals.
+Uses 50 bins and normalizes the histogram.
+3. Additional Functionalities
+Generates a requirements.txt file for deployment.
+Lists dependencies:
+streamlit, pandas, matplotlib, numpy, and scipy.
+Displays a completion message: "Analysis Completed! 🚀".
+Possible Issues / Considerations
+Assumes at least two signals (rows) in the dataset. If the CSV has fewer, it will cause errors.
+Sampling frequency (fs = 1) is arbitrary—it should match the actual data.
+Uses only the first two rows for analysis—other signals (if present) are ignored.
 
 # Load CSV file without header
 df = pd.read_csv("selamat.csv", header=None)
